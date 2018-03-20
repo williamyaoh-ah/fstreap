@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>FsTreap.Test</AssemblyName>
+    <AssemblyVersion>0.0.1.0</AssemblyVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NoWarn>FS0988</NoWarn>  <!-- Empty main module warning. -->
+  </PropertyGroup>
+
+</Project>
