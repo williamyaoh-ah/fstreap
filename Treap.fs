@@ -31,7 +31,18 @@ module Treap =
     let gen = Random ()
     let prio = gen.Next ()
     Node { key = value; prio = prio; left = Leaf; right = Leaf }
-  
+
+  let isEmpty treap =
+    match treap with
+      | Leaf -> true
+      | _ -> false
+
+  let rec count treap =
+    match treap with
+      | Leaf -> 0
+      | Node { left = left; right = right } ->
+        count left + 1 + count right
+
   let internal rotateLeft treap =
     match treap with
       | Node { key = keyl; prio = priol; left = x; right =
@@ -92,6 +103,14 @@ module Treap =
   /// Construct a treap from a list.
   let ofList eles =
     List.fold (fun treap ele -> insert ele treap) (empty ()) eles
+
+  /// Return the elements in the treap, as a sorted list.
+  let rec toList treap =
+    // There's a more efficient way to write this. We'll write it later though.
+    match treap with
+      | Leaf -> []
+      | Node { key = key; left = left; right = right } ->
+        toList left @ [key] @ toList right
 
   /// Check if the given value is in the treap.
   let contains value treap =
