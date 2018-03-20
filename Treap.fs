@@ -26,7 +26,7 @@ module Treap =
     let gen = Random ()
     let prio = gen.Next ()
     Node { key = value; prio = prio; left = Leaf; right = Leaf }
-    
+  
   let internal rotateLeft treap =
     match treap with
       | Node { key = keyl; prio = priol; left = x; right =
@@ -45,19 +45,26 @@ module Treap =
         Node { key = keyl; prio = priol; left = x; right = right }
       | _ -> treap
 
+  let internal prioImplicit treap =
+    match treap with
+      | Leaf -> -1
+      | Node { prio = prio } -> prio
+
   /// Rotate the tree in whatever way preserves the heap invariant.
   /// We assume that only one branch can be in violation of the heap
   /// invariant at a time, since this is what our normal treap algorithms
   /// do.
   let internal rotateHeap treap =
     match treap with
-      | Node { prio = priol; right = Node { prio = prior } } ->
-        if prior > priol then rotateLeft treap else treap
-      | Node { prio = prior; left = Node { prio = priol } } ->
-        if priol > prior then rotateRight treap else treap
-      | _ ->
-        treap
-
+      | Leaf -> Leaf
+      | Node { prio = prioHere; left = left; right = right } ->
+        if prioImplicit left > prioHere then
+          rotateRight treap
+        else if prioImplicit right > prioHere then
+          rotateLeft treap
+        else
+          treap
+  
   /// Insert a value into the binary search tree and balance it.
   let insert value treap =
     let gen = Random ()
@@ -68,14 +75,18 @@ module Treap =
         | Leaf -> singleton value
         | Node ({ key = key; prio = prio; left = left; right = right } as data) ->
           rotateHeap <|
-            if key < value then
+            if key > value then
               Node { data with left = insert' left }
-            else if key > value then
+            else if key < value then
               Node { data with right = insert' right }
             else
               treap
 
     insert' treap
+
+  /// Construct a treap from a list.
+  let ofList eles =
+    List.fold (fun treap ele -> insert ele treap) (empty ()) eles
 
   /// Check if the given value is in the treap.
   let contains value treap =
@@ -91,11 +102,6 @@ module Treap =
             true
 
     contains' treap
-
-  let internal prioImplicit treap =
-    match treap with
-      | Leaf -> -1
-      | Node { prio = prio } -> prio
 
   /// Excise the given node from the treap.
   let rec internal chop treap =
