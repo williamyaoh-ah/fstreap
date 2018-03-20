@@ -92,6 +92,49 @@ module Treap =
 
     Assert.True result
 
+  [<Fact>]
+  let ``empty treap is empty`` () =
+    let treap: Treap<Int32> = Treap.empty ()
+    let result: Boolean = Treap.isEmpty treap
+
+    Assert.True result
+
+  [<Fact>]
+  let ``empty treap has count 0`` () =
+    let treap: Treap<Int32> = Treap.empty ()
+    let count = Treap.count treap
+
+    Assert.Equal(0, count)
+
+  [<Fact>]
+  let ``empty treap is isomorphic to empty list`` () =
+    let treap: Treap<Int32> = Treap.empty ()
+    let l = Treap.toList treap
+    let result: Boolean = l = []
+
+    Assert.True result
+
+  [<Property( MaxTest=5000 )>]
+  let ``singleton treap is not empty`` (value: Int32) =
+    let treap = Treap.singleton value
+    let result: Boolean = not <| Treap.isEmpty treap
+
+    result
+
+  [<Property( MaxTest=5000 )>]
+  let ``singleton treap has count 1`` (value: Int32) =
+    let treap = Treap.singleton value
+    let count = Treap.count treap
+
+    count = 1
+
+  [<Property( MaxTest=5000 )>]
+  let ``singleton treap is isomorphic to singleton list`` (value: Int32) =
+    let treap = Treap.singleton value
+    let l = Treap.toList treap
+
+    l = [value]
+    
   [<Property( MaxTest=5000 )>]
   let ``singleton treap satisfies treap invariants`` (value: Int32) =
     let treap = Treap.singleton value
@@ -221,4 +264,18 @@ module Treap =
         (match moremost with
           | None -> ele >= max
           | Some value -> ele <= value) 
-       
+
+  [<Property( MaxTest=1000, EndSize=1000 )>]
+  let ``count and toList always agree`` (eles: List<Int32>) =
+    let treap = Treap.ofList eles
+
+    Treap.count treap = List.length (Treap.toList treap)
+
+  [<Property( MaxTest=1000, EndSize=1000 )>]
+  let ``count and isEmpty always agree`` (eles: List<Int32>) =
+    let treap = Treap.ofList eles
+    let count = Treap.count treap
+
+    match Treap.isEmpty treap with
+      | true -> count = 0
+      | false -> count > 0
