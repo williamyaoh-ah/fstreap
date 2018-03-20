@@ -16,8 +16,17 @@ and Treap<'k> =
     | Leaf
     | Node of TreapNodeData<'k>
 
+[<RequireQualifiedAccess>]
 module Treap =
 
+  let empty () =
+    Leaf
+
+  let singleton value =
+    let gen = Random ()
+    let prio = gen.Next ()
+    Node { key = value; prio = prio; left = Leaf; right = Leaf }
+    
   let internal rotateLeft treap =
     match treap with
       | Node { key = keyl; prio = priol; left = x; right =
@@ -56,7 +65,7 @@ module Treap =
 
     let rec insert' treap =
       match treap with
-        | Leaf -> Node { key = value; prio = prio; left = Leaf; right = Leaf }
+        | Leaf -> singleton value
         | Node ({ key = key; prio = prio; left = left; right = right } as data) ->
           rotateHeap <|
             if key < value then
