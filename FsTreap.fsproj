@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <AssemblyName>FsTreap</AssemblyName>
+    <AssemblyVersion>0.0.1.0</AssemblyVersion>
+    <Description>Purely functional treap implementation.</Description>
+    <Authors>William Yao</Authors>
+    <RepositoryUrl>https://github.com/williamyaoh-ah/fstreap</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Treap.fs" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <!-- Generating an interface file lets us check to make sure types are correct. -->
+    <GenerateInterfaceFile>FsTreap.fsi</GenerateInterfaceFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NoWarn>NU1701</NoWarn>  <!-- NuGet target framework warnings -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+</Project>
