@@ -1,0 +1,10 @@
+# Editor temp files.
+
+*~
+\#*\#
+
+# Build outputs.
+
+*.fsi
+bin/
+obj/
