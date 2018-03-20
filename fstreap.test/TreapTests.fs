@@ -175,3 +175,50 @@ module Treap =
         eles
 
     satisfiesTreap treap
+
+  [<Property( MaxTest=1000, EndSize=1000 )>]
+  let ``nearest always produces elements in treap`` (eles: List<Int32>) (ele: Int32) =
+    let treap = Treap.ofList eles
+    let { lessmost = lessmost; moremost = moremost } = Treap.nearest ele treap
+
+    (match lessmost with
+      | None -> true
+      | Some ele -> Treap.contains ele treap) &&
+    (match moremost with
+      | None -> true
+      | Some ele -> Treap.contains ele treap)
+
+  [<Property( MaxTest=1000, EndSize=1000 )>]
+  let ``nearest actually produces bounds on value`` (eles: List<Int32>) (ele: Int32) =
+    let treap = Treap.ofList eles
+    let { lessmost = lessmost; moremost = moremost } = Treap.nearest ele treap
+
+    let max treap =
+      let rec max' treap max =
+        match treap with
+          | Leaf -> max
+          | Node { key = key; right = right } ->
+            max' right key
+
+      max' treap Int32.MinValue
+
+    let min treap =
+      let rec min' treap min =
+        match treap with
+          | Leaf -> min
+          | Node { key = key; left = left } ->
+            min' left key
+
+      min' treap Int32.MaxValue
+
+    match treap with
+      | Leaf -> lessmost = None && moremost = None
+      | Node _ ->
+        let (min, max) = (min treap, max treap)
+        (match lessmost with
+          | None -> ele <= min
+          | Some value -> ele >= value) &&
+        (match moremost with
+          | None -> ele >= max
+          | Some value -> ele <= value) 
+       

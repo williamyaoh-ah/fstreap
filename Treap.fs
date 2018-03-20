@@ -16,6 +16,11 @@ and Treap<'k> =
     | Leaf
     | Node of TreapNodeData<'k>
 
+type Nearest<'k> =
+  { lessmost: Option<'k>
+  ; moremost: Option<'k>
+  }
+
 [<RequireQualifiedAccess>]
 module Treap =
 
@@ -137,11 +142,6 @@ module Treap =
             chop treap
 
     delete' treap
-
-  type Nearest<'k> =
-    { lessmost: Option<'k>
-    ; moremost: Option<'k>
-    }
 
   /// Find the two nearest elements in the treap, if they exist. The nearest
   /// elements might be the element itself.
