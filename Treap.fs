@@ -104,13 +104,15 @@ module Treap =
   let ofList eles =
     List.fold (fun treap ele -> insert ele treap) (empty ()) eles
 
-  /// Return the elements in the treap, as a sorted list.
-  let rec toList treap =
-    // There's a more efficient way to write this. We'll write it later though.
-    match treap with
-      | Leaf -> []
-      | Node { key = key; left = left; right = right } ->
-        toList left @ [key] @ toList right
+  /// Return the elements of the treap, in sorted order.
+  let toList treap =
+    let rec toList' treap acc =
+      match treap with
+        | Leaf -> acc
+        | Node { key = key; left = left; right = right } ->
+          toList' left <| key :: toList' right acc
+
+    toList' treap []
 
   /// Check if the given value is in the treap.
   let contains value treap =
