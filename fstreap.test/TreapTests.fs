@@ -47,17 +47,42 @@ module Treap =
   let satisfiesTreap treap =
     satisfiesBtree treap && satisfiesHeap treap
 
+  /// Basic binary search tree insert. Does not do any rebalancing.
+  let insertb value treap =
+    let rec insertb' treap =
+      match treap with
+        | Leaf -> Treap.singleton value
+        | Node data ->
+          if data.key > value then
+            Node { data with left = insertb' data.left }
+          else if data.key < value then
+            Node { data with right = insertb' data.right }
+          else
+            treap
+
+    insertb' treap
+
   let flip f x y =
     f y x
-
+  
   /// Generate a treap based on a generator of elements that have comparison.
   let genTreap eleGen =
     Gen.listOf eleGen
       |> Gen.map (List.fold (flip Treap.insert) (Treap.empty ()))
 
+  /// Generate a naive binary search tree, without rebalancing.
+  let genBTree eleGen =
+    Gen.listOf eleGen
+      |> Gen.map (List.fold (flip insertb) (Treap.empty ()))
+
   type Int32TreapArb () =
     static member Int32TreapArb () =
       genTreap Arb.generate<Int32>
+        |> Arb.fromGen
+
+  type Int32BTreeArb () =
+    static member Int32BTreeArb () =
+      genBTree Arb.generate<Int32>
         |> Arb.fromGen
 
   [<Fact>]
@@ -73,6 +98,80 @@ module Treap =
 
     satisfiesTreap treap
 
-  [<Property( MaxTest=1000, Arbitrary=[| typeof<Int32TreapArb> |] )>]
-  let ``arbitrary treaps satisfy treap invariants`` (treap: Treap<Int32>) =
+  [<Property( MaxTest=5000, EndSize=1000, Arbitrary=[| typeof<Int32BTreeArb> |] )>]
+  let ``naive btree satisfies btree invariants`` (treap: Treap<Int32>) =
+    satisfiesBtree treap
+  
+  [<Property( MaxTest=5000, EndSize=1000, Arbitrary=[| typeof<Int32BTreeArb> |] )>]
+  let ``left rotates always preserve search tree invariants`` (treap: Treap<Int32>) =
+    satisfiesBtree treap && satisfiesBtree <| Treap.rotateLeft treap    
+
+  [<Property( MaxTest=5000, EndSize=1000, Arbitrary=[| typeof<Int32BTreeArb> |] )>]
+  let ``right rotates always preserve search tree invariants`` (treap: Treap<Int32>) =
+    satisfiesBtree treap && satisfiesBtree <| Treap.rotateRight treap
+
+  [<Property( MaxTest=5000, EndSize=1000, Arbitrary=[| typeof<Int32BTreeArb> |] )>]
+  let ``rotateHeap always preserves search tree invariants`` (treap: Treap<Int32>) =
+    satisfiesBtree treap && satisfiesBtree <| Treap.rotateHeap treap
+
+  [<Property( MaxTest=1000, EndSize=1000 )>]
+  let ``arbitrary treaps satisfy treap invariants`` (eles: List<Int32>) =
+    let treap = Treap.ofList eles
+
+    satisfiesTreap treap
+
+  [<Property( MaxTest=1000, EndSize=1000 )>]
+  let ``inserting preserves treap invariants`` (eles: List<Int32>) (ele: Int32) =
+    let treap = Treap.ofList eles
+
+    satisfiesTreap <| Treap.insert ele treap
+
+  [<Property( MaxTest=1000, EndSize=1000 )>]
+  let ``inserted element can be found`` (eles: List<Int32>) (ele: Int32) =
+    let treap = Treap.ofList eles
+
+    Treap.contains ele <| Treap.insert ele treap
+
+  [<Property( MaxTest=1000, EndSize=1000 )>]
+  let ``inserting an element leaves other elements unchanged`` (eles: List<Int32>) (ele: Int32) =
+    let treap = Treap.ofList eles
+    let treap = Treap.insert ele treap
+
+    List.forall (fun ele -> Treap.contains ele treap) eles        
+
+  [<Property( MaxTest=1000, EndSize=1000 )>]
+  let ``all elements can be found in constructed treap`` (eles: List<Int32>) =
+    let treap = Treap.ofList eles
+
+    List.forall (fun ele -> Treap.contains ele treap) eles
+
+  [<Property( MaxTest=1000, EndSize=1000 )>]
+  let ``deleting an element causes lack of contain`` (eles: List<Int32>) (ele: Int32) =
+    let treap = Treap.ofList <| ele::eles
+
+    not (Treap.contains ele <| Treap.delete ele treap)
+
+  [<Property( MaxTest=1000, EndSize=1000 )>]
+  let ``deleting an element leaves other elements unchanged`` (eles: List<Int32>) (ele: Int32) =
+    let treap = Treap.ofList <| ele::eles
+    let treap = Treap.delete ele treap
+
+    eles
+      |> List.filter (fun x -> x <> ele)
+      |> List.forall (fun ele -> Treap.contains ele treap)
+
+  type Operation = Insert | Delete
+
+  [<Property( MaxTest=1000, EndSize=1000 )>]
+  let ``arbitrary sequence of inserts and deletes preserves invariants``
+    (eles: List<(Int32 * Operation)>) =
+
+    let treap =
+      List.fold (fun treap (ele, operation) ->
+                  match operation with
+                    | Insert -> Treap.insert ele treap
+                    | Delete -> Treap.delete ele treap)
+        (Treap.empty ())
+        eles
+
     satisfiesTreap treap
