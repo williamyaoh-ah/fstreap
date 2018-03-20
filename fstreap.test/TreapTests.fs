@@ -266,6 +266,29 @@ module Treap =
           | Some value -> ele <= value) 
 
   [<Property( MaxTest=1000, EndSize=1000 )>]
+  let ``toList always produces elements in treap`` (eles: List<Int32>) =
+    let treap = Treap.ofList eles
+    let l = Treap.toList treap
+
+    List.forall (fun ele -> Treap.contains ele treap) l
+
+  [<Property( MaxTest=1000, EndSize=1000 )>]
+  let ``toList always produces elements in sorted order`` (eles: List<Int32>) =
+    let treap = Treap.ofList eles
+    let l = Treap.toList treap
+
+    let isSorted l =
+      let rec isSorted' l last =
+        match (l, last) with
+          | ([], _) -> true
+          | (h::t, None) -> isSorted' t (Some h)
+          | (h::t, Some last) -> h >= last && isSorted' t (Some h)
+
+      isSorted' l None
+
+    isSorted l
+
+  [<Property( MaxTest=1000, EndSize=1000 )>]
   let ``count and toList always agree`` (eles: List<Int32>) =
     let treap = Treap.ofList eles
 
