@@ -12,7 +12,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="TreapTests.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\fstreap.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Unit test packages. -->
+    <PackageReference Include="FsCheck" Version="2.10.8" />
+    <PackageReference Include="FsCheck.Xunit" Version="2.10.8" />
+    <PackageReference Include="xunit" Version="2.3.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
   </ItemGroup>
 
 </Project>
