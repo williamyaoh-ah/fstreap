@@ -11,4 +11,8 @@
     <NoWarn>FS0988</NoWarn>  <!-- Empty main module warning. -->
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\fstreap.fsproj" />
+  </ItemGroup>
+
 </Project>
